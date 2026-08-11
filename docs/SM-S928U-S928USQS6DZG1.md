@@ -68,7 +68,7 @@ as a raw-DEFLATE stream without changing loader code or asset addresses.
 
 | Object | Size (bytes) | SHA-256 |
 | --- | ---: | --- |
-| `artifacts/e3q-S928USQS6DZG1/cve-2026-43499-app.so` | 104,128 | `cc898e3e9134aaf56c121ea51edecd44f12319f97b3a59ce78faf5cdfa0c5c33` |
+| `artifacts/e3q-S928USQS6DZG1/cve-2026-43499-app.so` | 104,128 | `4917ef5a2415a578f48b86ff2ec9bf74454beb3730ef832312db63a30837b16d` |
 | `kernelsu/android14-6.1_kernelsu-e3q-S928USQS6DZG1-kdp.ko` | 400,152 | `13ca83e08ef60b3645506fbbc7e62d8cb6176d0a7659fe4b202fccbde84dc9cb` |
 | `kernelsu/ksud-e3q-S928USQS6DZG1-kdp` | 4,726,416 | `a5f50666f9b917edc89ba410dfac653a44dcc33c17705f732db1b9c57c5afb48` |
 
@@ -79,8 +79,15 @@ embedded module before creating the DZG1 module/loader pair.
 
 ## Remaining boundary
 
-The candidate has not run on hardware. Its v4 manifest profile therefore matches
-only the exact DZG1 kernel release and Android build, forces a fresh P0 scan,
-and caps execution at one exploit attempt. The next step is a controlled
-diagnostic confirming the new P0 fingerprint and allocator path without a
-kernel panic. No static result here is a claim of successful root.
+The candidate now has two fail-closed hardware observations on the exact DZG1
+device. A Shizuku-context run reached the pipe oracle but did not obtain an
+`mm_struct`; a subsequent app-context run obtained the leak and reached the
+physical P0 write trigger. That trigger scheduled successfully at 25 ms but
+missed the pselect write window, before any P0 fingerprint match, physical
+read/write installation, or KernelSU loading.
+
+The v4 manifest remains exact-build gated, forces a fresh P0 scan, and caps
+execution at one outer exploit attempt. This test-feed payload changes only the
+physical-slot trigger to try 20, 30, and 50 ms in sequence and embeds the
+`e3q-S928USQS6DZG1-app-physical-p0-oracle-timing3` label for log provenance.
+No result here is a claim of successful root.
