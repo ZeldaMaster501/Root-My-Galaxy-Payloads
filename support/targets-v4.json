@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "payloads": [
     {
       "payloadId": "galaxy-s25-series-2026-06-07",
@@ -75,6 +75,41 @@
       "kernelsu": {
         "url": "https://raw.githubusercontent.com/BuSung-dev/Root-My-Galaxy-Payloads/main/kernelsu/ksud-s25u-kdp",
         "size": 6407096
+      }
+    },
+    {
+      "payloadId": "e3q-S928USQS6DZF2",
+      "displayName": "Galaxy S24 Ultra | Kernel 6.1.145",
+      "models": ["SM-S928U"],
+      "kernelVersions": ["6.1.145"],
+      "kernelReleases": ["6.1.145-android14-11-33419968-abS928USQS6DZF2"],
+      "buildIds": ["BP4A.251205.006.S928USQS6DZF2"],
+      "exploitAttempts": 1,
+      "exploit": {
+        "url": "https://raw.githubusercontent.com/BuSung-dev/Root-My-Galaxy-Payloads/main/artifacts/e3q-S928USQS6DZF2/cve-2026-43499-app.so",
+        "size": 104128
+      },
+      "kernelsu": {
+        "url": "https://raw.githubusercontent.com/BuSung-dev/Root-My-Galaxy-Payloads/main/kernelsu/ksud-e3q-S928USQS6DZF2-kdp",
+        "size": 4726416
+      }
+    },
+    {
+      "payloadId": "e3q-S928USQS6DZG1",
+      "displayName": "Galaxy S24 Ultra DZG1 | Kernel 6.1.145 | experimental",
+      "models": ["SM-S928U"],
+      "kernelVersions": ["6.1.145"],
+      "kernelReleases": ["6.1.145-android14-11-33419968-abS928USQS6DZG1"],
+      "buildIds": ["BP4A.251205.006.S928USQS6DZG1"],
+      "exploitAttempts": 1,
+      "requiresFreshP0Session": true,
+      "exploit": {
+        "url": "https://raw.githubusercontent.com/BuSung-dev/Root-My-Galaxy-Payloads/main/artifacts/e3q-S928USQS6DZG1/cve-2026-43499-app.so",
+        "size": 104128
+      },
+      "kernelsu": {
+        "url": "https://raw.githubusercontent.com/BuSung-dev/Root-My-Galaxy-Payloads/main/kernelsu/ksud-e3q-S928USQS6DZG1-kdp",
+        "size": 4726416
       }
     },
     {
