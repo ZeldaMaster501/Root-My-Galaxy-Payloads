@@ -68,7 +68,7 @@ as a raw-DEFLATE stream without changing loader code or asset addresses.
 
 | Object | Size (bytes) | SHA-256 |
 | --- | ---: | --- |
-| `artifacts/e3q-S928USQS6DZG1/cve-2026-43499-app.so` | 104,128 | `fb3b692a15c33d3d6c035d21cef00284b85d0714ca5eea6766e44b4c8558879f` |
+| `artifacts/e3q-S928USQS6DZG1/cve-2026-43499-app.so` | 104,128 | `567ae609a125426bb8d59fe8a6596cfd8ad2f15fa8b36ae211f74fc1603e8286` |
 | `kernelsu/android14-6.1_kernelsu-e3q-S928USQS6DZG1-kdp.ko` | 400,152 | `13ca83e08ef60b3645506fbbc7e62d8cb6176d0a7659fe4b202fccbde84dc9cb` |
 | `kernelsu/ksud-e3q-S928USQS6DZG1-kdp` | 4,726,416 | `a5f50666f9b917edc89ba410dfac653a44dcc33c17705f732db1b9c57c5afb48` |
 
@@ -79,18 +79,24 @@ embedded module before creating the DZG1 module/loader pair.
 
 ## Remaining boundary
 
-The candidate now has two fail-closed hardware observations on the exact DZG1
-device. A Shizuku-context run reached the pipe oracle but did not obtain an
-`mm_struct`; a subsequent app-context run obtained the leak and reached the
-physical P0 write trigger. That trigger scheduled successfully at 25 ms but
-missed the pselect write window, before any P0 fingerprint match, physical
-read/write installation, or KernelSU loading.
+The candidate now has fail-closed hardware observations on the exact DZG1
+device. Some runs did not obtain an `mm_struct`; other runs obtained the leak
+and reached the physical P0 write trigger. That trigger scheduled successfully
+at 20, 25, 30, and 50 ms but did not produce the pipe-page marker, before any
+P0 fingerprint match, physical read/write installation, or KernelSU loading.
 
-The three-slot timing diagnostic reproduced the same successful scheduler call
-at 20, 30, and 50 ms, with `pselect` returning a timeout each time. The v4
-manifest remains exact-build gated, forces a fresh P0 scan, and caps execution
-at one outer exploit attempt. The next test-feed payload uses one 25 ms trigger
-and provisionally accepts the successful scheduler call only so the exact
-pipe-page marker can verify whether a write occurred. It embeds the
-`e3q-S928USQS6DZG1-app-physical-p0-oracle-sched-verify` label for provenance.
-No result here is a claim of successful root.
+Static disassembly of the exact DZG1 `remove_waiter()` at
+`0xffffffc00911fcb8` confirms the vulnerable implementation: it reads
+`SP_EL0`, locks `current->pi_lock` at `+0x924`, and clears
+`current->pi_blocked_on` at `+0x950`, rather than operating on
+`waiter->task`. The embedded configuration also has `CONFIG_FUTEX_PI=y` and
+`CONFIG_RANDOMIZE_KSTACK_OFFSET=y`.
+
+The DZF2 porting record says its retained E3Q allocator baseline is 28 skb
+fragment sends with two synchronous late-drain triggers. The inherited target
+header had not encoded those settings, so DZG1 tests actually ran the shared
+16-send/32-drain defaults. The next fork-only diagnostic corrects that mismatch
+and raises only the pre-write KernelSnitch setup attempts from two to six. It
+keeps one 25 ms scheduler trigger and requires the exact pipe-page marker to
+accept a write. The v4 manifest remains exact-build gated and caps execution at
+one outer exploit attempt. No result here is a claim of successful root.

